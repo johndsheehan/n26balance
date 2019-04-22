@@ -35,7 +35,9 @@ type N26 struct {
 }
 
 // NewClient new n26 client connection
-func NewClient(config Config) (*http.Client, error) {
+func NewClient(config Config) (N26, error) {
+	n26Client := N26{}
+
 	c := oauth2.Config{
 		ClientID:     "android",
 		ClientSecret: "secret",
@@ -47,10 +49,13 @@ func NewClient(config Config) (*http.Client, error) {
 	ctx := context.Background()
 	tkn, err := c.PasswordCredentialsToken(ctx, config.Username, config.Password)
 	if err != nil {
-		return nil, err
+		return n26Client, err
 	}
 
-	return c.Client(ctx, tkn), nil
+	n26Client = N26{
+		client: c.Client(ctx, tkn),
+	}
+	return n26Client, nil
 }
 
 // Balance fetch n26 balance
